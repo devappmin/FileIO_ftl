@@ -15,7 +15,39 @@ void ftl_open();
 void ftl_write(int lsn, char *sectorbuf);
 void ftl_read(int lsn, char *sectorbuf);
 void ftl_print();
-void printAll();
+
+void printAll() {
+	fseek(flashfp, 0, SEEK_SET);
+
+	for(int i = 0; i < BLOCKS_PER_DEVICE; i++) {
+		printf("== %d번째 BLOCK ==\nLBN LSN  SEEK  DATA\n", i);
+		for(int j = 0; j < PAGES_PER_BLOCK; j++) {
+			char tempbuf[PAGE_SIZE];
+			char sector[512];
+			int lbn, lsn, seek;
+
+			dd_read(i * PAGES_PER_BLOCK + j, tempbuf);
+			seek = ftell(flashfp);
+			memcpy(sector, tempbuf, 512);
+			memcpy(&lbn, tempbuf + SECTOR_SIZE, 4);
+			memcpy(&lsn, tempbuf + SECTOR_SIZE + 4, 4);
+
+			//if(lbn > 100 || lbn < -100) lbn = 999;
+			//if(lsn > 100 || lsn < -100) lsn = 999;
+
+			if(sector[0] == -1) printf("%3d %3d %5d  string is empty CODE: ", lbn, lsn, seek);
+			else printf("%3d %3d %5d  \033[1;32m%s\033[0m CODE: ", lbn, lsn, seek, sector);
+
+			for(int i = 0; i < 50; i++) {
+				printf("%d ", sector[i]);
+			}
+
+			if(lbn == 15) printf("  <<< HERE IS FREE BLOCK\n");
+			else printf("\n");
+		}
+		printf("\n");
+	}
+}
 
 //
 // 이 함수는 file system의 역할을 수행한다고 생각하면 되고,

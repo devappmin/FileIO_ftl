@@ -10,8 +10,6 @@
 #include "blockmap.h"
 // 필요한 경우 헤더 파일을 추가하시오.
 
-FILE *flashfp;
-
 typedef struct _mapping {
 	int lbn;
 	int pbn;
@@ -30,19 +28,6 @@ void ftl_open()
 	// address mapping table 초기화 또는 복구
 	// free block's pbn 초기화
     // address mapping table에서 lbn 수는 DATABLKS_PER_DEVICE 동일
-
-
-	// flashfp가 존재하지 않으면 새로 만들어준다.
-	if(flashfp == NULL) {
-		if((flashfp = fopen("flashmemory", "w+b")) == NULL) exit(-1);
-
-		char* tempbuf = (char *)malloc(BLOCK_SIZE);
-		memset(tempbuf, 0xFF, BLOCK_SIZE);
-
-		for(int i = 0; i < BLOCKS_PER_DEVICE; i++) {
-			fwrite(tempbuf, BLOCK_SIZE, 1, flashfp);
-		}
-	}
 
 	// 일단 mapping table의 lbn을 0 ~ DATABLKS_PER_DEVICE - 1로 하고
 	// pbn을 전부 -1로 초기화 한다.
@@ -152,7 +137,6 @@ void ftl_write(int lsn, char *sectorbuf)
 	return;
 }
 
-
 void ftl_print()
 {
 	printf("LBN PBN\n");
@@ -161,37 +145,4 @@ void ftl_print()
 	}
 	printf("free block's pbn=%d\n", table[DATABLKS_PER_DEVICE].pbn);
 	return;
-}
-
-void printAll() {
-	fseek(flashfp, 0, SEEK_SET);
-
-	for(int i = 0; i < BLOCKS_PER_DEVICE; i++) {
-		printf("== %d번째 BLOCK ==\nLBN LSN  SEEK  DATA\n", i);
-		for(int j = 0; j < PAGES_PER_BLOCK; j++) {
-			char tempbuf[PAGE_SIZE];
-			char sector[512];
-			int lbn, lsn, seek;
-
-			dd_read(i * PAGES_PER_BLOCK + j, tempbuf);
-			seek = ftell(flashfp);
-			memcpy(sector, tempbuf, 512);
-			memcpy(&lbn, tempbuf + SECTOR_SIZE, 4);
-			memcpy(&lsn, tempbuf + SECTOR_SIZE + 4, 4);
-
-			//if(lbn > 100 || lbn < -100) lbn = 999;
-			//if(lsn > 100 || lsn < -100) lsn = 999;
-
-			if(sector[0] == -1) printf("%3d %3d %5d  string is empty CODE: ", lbn, lsn, seek);
-			else printf("%3d %3d %5d  \033[1;32m%s\033[0m CODE: ", lbn, lsn, seek, sector);
-
-			for(int i = 0; i < 50; i++) {
-				printf("%d ", sector[i]);
-			}
-
-			if(lbn == 15) printf("  <<< HERE IS FREE BLOCK\n");
-			else printf("\n");
-		}
-		printf("\n");
-	}
 }
