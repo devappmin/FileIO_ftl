@@ -110,7 +110,7 @@ void ftl_write(int lsn, char *sectorbuf)
 	// 만약에 사용하지 않은 블럭일 경우
 	if(readLsn == -1) {
 		memcpy(readBuf, sectorbuf, SECTOR_SIZE);
-		memcpy(readBuf + SECTOR_SIZE + 4, &lsn, 8);
+		memcpy(readBuf + SECTOR_SIZE + 4, &lsn, 4);
 
 		dd_write(table[lsn / PAGES_PER_BLOCK].pbn * PAGES_PER_BLOCK + offset, readBuf);
 	} 
@@ -182,8 +182,12 @@ void printAll() {
 			//if(lbn > 100 || lbn < -100) lbn = 999;
 			//if(lsn > 100 || lsn < -100) lsn = 999;
 
-			if(sector[0] == -1) printf("%3d %3d %5d  string is empty", lbn, lsn, seek);
-			else printf("%3d %3d %5d  \033[1;32m%s\033[0m", lbn, lsn, seek, sector);
+			if(sector[0] == -1) printf("%3d %3d %5d  string is empty CODE: ", lbn, lsn, seek);
+			else printf("%3d %3d %5d  \033[1;32m%s\033[0m CODE: ", lbn, lsn, seek, sector);
+
+			for(int i = 0; i < 50; i++) {
+				printf("%d ", sector[i]);
+			}
 
 			if(lbn == 15) printf("  <<< HERE IS FREE BLOCK\n");
 			else printf("\n");

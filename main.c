@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     char sectorbuf[SECTOR_SIZE];
 	int lsn, i;
 
-    flashfp = fopen("flashmemory", "r+b");
+    flashfp = fopen("flashmemory", "w+b");
 	if(flashfp == NULL)
 	{
 		printf("file open error\n");
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 	for(i = 0; i < BLOCKS_PER_DEVICE; i++)
 	{
-		//fwrite(blockbuf, BLOCK_SIZE, 1, flashfp);
+		fwrite(blockbuf, BLOCK_SIZE, 1, flashfp);
 	}
 
 	free(blockbuf);
